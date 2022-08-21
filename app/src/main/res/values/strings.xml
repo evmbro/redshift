@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Imagine</string>
+    <string name="process_button_label">Process</string>
+    <string name="save_button_label">Save</string>
+</resources>
