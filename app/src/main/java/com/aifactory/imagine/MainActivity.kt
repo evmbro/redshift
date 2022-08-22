@@ -12,11 +12,22 @@ import android.provider.MediaStore
 import android.util.Log
 import android.widget.Button
 import android.widget.ImageView
+import android.util.Size
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
 import java.io.FileNotFoundException
+
+import org.tensorflow.lite.DataType
+import org.tensorflow.lite.Interpreter
+import org.tensorflow.lite.nnapi.NnApiDelegate
+import org.tensorflow.lite.support.common.FileUtil
+import org.tensorflow.lite.support.common.ops.NormalizeOp
+import org.tensorflow.lite.support.image.ImageProcessor
+import org.tensorflow.lite.support.image.TensorImage
+import org.tensorflow.lite.support.image.ops.ResizeOp
+
 
 class MainActivity : AppCompatActivity() {
 
@@ -24,6 +35,7 @@ class MainActivity : AppCompatActivity() {
         val GRANT_CAMERA_PERMISSION_REQUEST_CODE = 1;
         val CAMERA_REQUEST_CODE = 2;
         val GALLERY_REQUEST_CODE = 3;
+        private const val MODEL_PATH = "fcnmse1920.tflite"
     }
 
     private lateinit var openGallery: ImageView
@@ -31,6 +43,35 @@ class MainActivity : AppCompatActivity() {
     private lateinit var imagePreview: ImageView
     private lateinit var processButton: Button
     private lateinit var saveButton: Button
+    private val tfImageBuffer = TensorImage(DataType.UINT8)
+
+    private val tfImageProcessor by lazy {
+        val cropSize = minOf(bitmapBuffer.width, bitmapBuffer.height)
+        ImageProcessor.Builder()
+            .add(ResizeOp(
+                tfInputSize.height, tfInputSize.width, ResizeOp.ResizeMethod.NEAREST_NEIGHBOR))
+            .add(NormalizeOp(0f, 1f))
+            .build()
+    }
+
+    private val nnApiDelegate by lazy  {
+        NnApiDelegate()
+    }
+
+    private val tflite by lazy {
+        Interpreter(
+            FileUtil.loadMappedFile(this, MODEL_PATH),
+            Interpreter.Options().addDelegate(nnApiDelegate))
+    }
+
+
+    private val tfInputSize by lazy {
+        val inputIndex = 0
+        val inputShape = tflite.getInputTensor(inputIndex).shape()
+        Size(inputShape[2], inputShape[1]) // Order of axis is: {1, height, width, 3}
+    }
+
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -113,6 +154,12 @@ class MainActivity : AppCompatActivity() {
         processButton.setOnClickListener {
             // TODO: - Bartol Freskura
             // image bitmap (if loaded): imagePreview.drawable.toBitmap()
+            // Process the image in Tensorflow
+            val tfImage =  tfImageProcessor.process(tfImageBuffer.apply { load( imagePreview.drawable.toBitmap()) })
+
+            // Perform model inference
+            val predictions = tflite.predict(tfImage)
+
         }
     }
 
