@@ -10,10 +10,12 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.provider.MediaStore
 import android.util.Log
+import android.widget.Button
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.drawable.toBitmap
 import java.io.FileNotFoundException
 
 class MainActivity : AppCompatActivity() {
@@ -27,6 +29,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var openGallery: ImageView
     private lateinit var openCamera: ImageView
     private lateinit var imagePreview: ImageView
+    private lateinit var processButton: Button
+    private lateinit var saveButton: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -81,6 +85,8 @@ class MainActivity : AppCompatActivity() {
         openGallery = findViewById(R.id.openGallery)
         openCamera = findViewById(R.id.openCamera)
         imagePreview = findViewById(R.id.imagePreview)
+        processButton = findViewById(R.id.processButton)
+        saveButton = findViewById(R.id.saveButton)
         openGallery.rootView.setBackgroundColor(Color.WHITE)
     }
 
@@ -101,6 +107,12 @@ class MainActivity : AppCompatActivity() {
                     GRANT_CAMERA_PERMISSION_REQUEST_CODE
                 )
             } else { loadImageFromCamera() }
+        }
+
+        // Process image
+        processButton.setOnClickListener {
+            // TODO: - Bartol Freskura
+            // image bitmap (if loaded): imagePreview.drawable.toBitmap()
         }
     }
 

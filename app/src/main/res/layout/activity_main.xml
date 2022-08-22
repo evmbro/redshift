@@ -59,11 +59,13 @@
         android:layout_weight="1"
         android:gravity="center">
         <Button
+            android:id="@+id/processButton"
             android:text="@string/process_button_label"
             android:layout_width="140dp"
             android:layout_height="60dp"
             android:layout_marginEnd="30dp"/>
         <Button
+            android:id="@+id/saveButton"
             android:text="@string/save_button_label"
             android:layout_width="140dp"
             android:layout_height="60dp"/>
