@@ -19,7 +19,6 @@ import androidx.core.graphics.drawable.toBitmap
 import java.io.FileNotFoundException
 
 import org.tensorflow.lite.Interpreter
-import org.tensorflow.lite.nnapi.NnApiDelegate
 import org.tensorflow.lite.support.common.FileUtil
 
 class MainActivity : AppCompatActivity() {
@@ -34,14 +33,12 @@ class MainActivity : AppCompatActivity() {
     private lateinit var processButton: Button
     private lateinit var saveButton: Button
 
-    private val MODEL_PATH = "fcnnmse1920.tflite"
-    private val nnApiDelegate by lazy {
-        NnApiDelegate()
-    }
+    private val MODEL_PATH = "model.tflite"
+
     private val tfLite by lazy {
         Interpreter(
             FileUtil.loadMappedFile(this, MODEL_PATH),
-            Interpreter.Options().addDelegate(nnApiDelegate))
+            Interpreter.Options())
     }
 
     private lateinit var modelHelper: ModelHelper
