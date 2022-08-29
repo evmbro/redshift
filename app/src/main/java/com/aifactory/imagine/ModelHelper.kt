@@ -25,7 +25,8 @@ class ModelHelper(private val tfLite: Interpreter) {
     fun process(image: Bitmap): Bitmap? {
         val tensorImage = preProcessor.process(TensorImage.fromBitmap(image))
         val outputImage = TensorBuffer.createFrom(tensorImage.tensorBuffer, DataType.FLOAT32)
-        tfLite.resizeInput(0, arrayOf(1, image.width, image.height, 3).toIntArray())
+
+        tfLite.resizeInput(0, intArrayOf(1, image.height, image.width, 3))
         tfLite.run(tensorImage.buffer, outputImage.buffer)
 
         val processed = postProcessor.process(outputImage)
