@@ -20,6 +20,16 @@ import java.io.FileNotFoundException
 
 import org.tensorflow.lite.Interpreter
 import org.tensorflow.lite.support.common.FileUtil
+import java.io.File
+import android.webkit.MimeTypeMap
+
+import android.content.ContentResolver
+import android.content.Context
+import android.net.Uri
+import java.io.FileOutputStream
+import android.os.Environment
+import java.lang.Exception
+
 
 class MainActivity : AppCompatActivity() {
 
@@ -32,6 +42,9 @@ class MainActivity : AppCompatActivity() {
     private lateinit var imagePreview: ImageView
     private lateinit var processButton: Button
     private lateinit var saveButton: Button
+
+    private var destinationName = "";
+    private var destinationType = "";
 
     private val MODEL_PATH = "model.tflite"
 
@@ -64,12 +77,14 @@ class MainActivity : AppCompatActivity() {
                 GALLERY_REQUEST_CODE -> {
                     try {
                         data?.data?.let {
+                            destinationType = getMimeType(this, it)!!
+                            destinationName = it.lastPathSegment!! + "_redshift"
+
                             imagePreview.setImageBitmap(
                                 BitmapFactory.decodeStream(
                                     contentResolver.openInputStream(it)
                                 )
                             )
-
                         }
                     } catch (e: FileNotFoundException) {
                         e.printStackTrace()
@@ -124,8 +139,21 @@ class MainActivity : AppCompatActivity() {
         // Process image
         processButton.setOnClickListener {
             // TODO: - Bartol Freskura (ali filip rijesio)
-            val processedImage = modelHelper.process(imagePreview.drawable.toBitmap())
+            val processedImage = modelHelper.process(imagePreview.drawable.toBitmap();
             imagePreview.setImageBitmap(processedImage)
+        }
+
+        // Save action
+        saveButton.setOnClickListener {
+            val dir = Environment.DIRECTORY_DCIM
+            val fileName = destinationName + destinationType
+            val file = File(dir, fileName)
+            try {
+                val out = FileOutputStream(file)
+                // TODO: - Save image as a 16 bit jpeg (or any other suitable format)
+            } catch (e: Exception) {
+                // TODO: - Handle exception
+            }
         }
     }
 
@@ -134,9 +162,22 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun loadImageFromGallery() {
-        val photoPickerIntent = Intent(Intent.ACTION_PICK)
+        val photoPickerIntent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.INTERNAL_CONTENT_URI)
         photoPickerIntent.type = "image/*"
         startActivityForResult(photoPickerIntent, GALLERY_REQUEST_CODE)
+    }
+
+    fun getMimeType(context: Context, uri: Uri): String? {
+        //Check uri format to avoid null
+        return if (uri.scheme.equals(ContentResolver.SCHEME_CONTENT)) {
+                //If scheme is a content
+                val mime = MimeTypeMap.getSingleton()
+                mime.getExtensionFromMimeType(context.contentResolver.getType(uri))
+            } else {
+                //If scheme is a File
+                //This will replace white spaces with %20 and also other special characters. This will avoid returning null values on file name with spaces and special characters.
+                MimeTypeMap.getFileExtensionFromUrl(Uri.fromFile(File(uri.path!!)).toString())
+            }
     }
 
 }
