@@ -139,7 +139,7 @@ class MainActivity : AppCompatActivity() {
         // Process image
         processButton.setOnClickListener {
             // TODO: - Bartol Freskura (ali filip rijesio)
-            val processedImage = modelHelper.process(imagePreview.drawable.toBitmap();
+            val processedImage = modelHelper.process(imagePreview.drawable.toBitmap())
             imagePreview.setImageBitmap(processedImage)
         }
 
